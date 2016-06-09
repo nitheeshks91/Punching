@@ -1,9 +1,11 @@
 package com.inout;
 
+import java.io.Serializable;
+
 /**
  * Created by 08468 on 6/9/2016.
  */
-public class Punch {
+public class Punch implements Serializable {
 
     private String no;
     private String date;

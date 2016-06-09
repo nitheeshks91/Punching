@@ -1,5 +1,6 @@
 package com.inout;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -116,19 +117,6 @@ public class MainActivity extends AppCompatActivity {
         showButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*long l = getTotalInTime();
-                String h = "00";
-                String m = String.valueOf(l);
-                if (l > 60) {
-                    h = String.valueOf(l / 60);
-                    if (h.length() == 1) {
-                        h = "0" + h;
-                    }
-                    m = String.valueOf(l % 60);
-                }
-                if (m.length() == 1) {
-                    m = "0" + m;
-                }*/
                 Snackbar.make(coordinatorLayout, "YOUR TOTAL IN TIME : " + getTime(getTotalInTime()), Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -136,7 +124,13 @@ public class MainActivity extends AppCompatActivity {
         showPunch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getTotalPunch();
+                ArrayList<Punch> totalPunch = getTotalPunch();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("BUNDLE", totalPunch);
+                bundle.putString("TOTAL", getTime(getTotalInTime()));
+                Intent mIntent = new Intent(MainActivity.this, PunchDetails.class);
+                mIntent.putExtras(bundle);
+                startActivity(mIntent);
             }
         });
     }
@@ -190,14 +184,15 @@ public class MainActivity extends AppCompatActivity {
                 String currentouttime = cursor.getString(cursor.getColumnIndex("currentouttime"));
                 String currentdate = cursor.getString(cursor.getColumnIndex("currentdate"));
                 punch.setDate(currentdate);
-                punch.setInTime(getTime(currentintime));
+                punch.setInTime(getTime(TimeUnit.MILLISECONDS.toMinutes(currentintime)));
                 if (currentouttime != null) {
-                    punch.setOutTime(getTime(Long.parseLong(currentouttime)));
+                    punch.setOutTime(getTime(TimeUnit.MILLISECONDS.toMinutes(Long.parseLong(currentouttime))));
+                    long diff = Long.parseLong(currentouttime) - currentintime;
+                    long l = TimeUnit.MILLISECONDS.toMinutes(diff);
+                    punch.setDiffTime(String.valueOf(l));
+                    punches.add(punch);
                 }
-                long diff = Long.parseLong(currentouttime) - currentintime;
-                long l = TimeUnit.MILLISECONDS.toMinutes(diff);
-                punch.setDiffTime(String.valueOf(l));
-                punches.add(punch);
+
                 i++;
             }
             while (cursor.moveToNext());
